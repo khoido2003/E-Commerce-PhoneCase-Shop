@@ -75,7 +75,7 @@ export const DesignConfigurator = ({
     },
 
     onSuccess: () => {
-      router.push(`/config/preview?id=${configId}`);
+      router.push(`/configure/preview?id=${configId}`);
     },
   });
 
