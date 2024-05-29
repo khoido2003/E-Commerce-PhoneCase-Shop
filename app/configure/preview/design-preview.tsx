@@ -10,12 +10,19 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import Confetti from "react-dom-confetti";
+import { createCheckoutSession } from "./action";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 export const DesignPreview = ({
   configuration,
 }: {
   configuration: Configuration;
 }) => {
+  const router = useRouter();
+
+  const { toast } = useToast();
+
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -40,9 +47,20 @@ export const DesignPreview = ({
     totalPrice += PRODUCTS_PRICE.finish.textured;
   }
 
-  const {} = useMutation({
+  const { mutate: createPaymentSession } = useMutation({
     mutationKey: ["get-checkout-session"],
-    // mutationFn:
+    mutationFn: createCheckoutSession,
+    onSuccess: ({ url }) => {
+      if (url) router.push(url);
+      else throw new Error("Unable to retrieve payment URL");
+    },
+    onError: () => {
+      toast({
+        title: "Something went wrong",
+        description: "There was an error on our end. Please try again",
+        variant: "destructive",
+      });
+    },
   });
 
   return (
@@ -134,10 +152,11 @@ export const DesignPreview = ({
 
             <div className="mt-8 flex justify-end pb-12">
               <Button
-                isLoading={true}
+                onClick={() =>
+                  createPaymentSession({ configId: configuration.id })
+                }
                 loadingText="loading"
                 className="px-4 sm:px-6 lg:px-8"
-                disabled={true}
               >
                 Check out <ArrowRight className="h-4 w-4 ml-1.5 inline" />
               </Button>
