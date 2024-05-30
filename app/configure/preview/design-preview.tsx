@@ -13,6 +13,8 @@ import Confetti from "react-dom-confetti";
 import { createCheckoutSession } from "./action";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { LoginModal } from "@/components/login-modal";
 
 export const DesignPreview = ({
   configuration,
@@ -24,6 +26,12 @@ export const DesignPreview = ({
   const { toast } = useToast();
 
   const [showConfetti, setShowConfetti] = useState(false);
+
+  const { id } = configuration;
+
+  const { user } = useKindeBrowserClient();
+
+  const [isLoginModal, setIsLoginModal] = useState<boolean>(false);
 
   useEffect(() => {
     setShowConfetti(true);
@@ -63,6 +71,18 @@ export const DesignPreview = ({
     },
   });
 
+  const handelCheckout = () => {
+    if (user) {
+      // Create payment session
+      createPaymentSession({ configId: id });
+    } else {
+      // User need to login
+      localStorage.setItem("configurationId", id);
+      setIsLoginModal(true);
+      console.log("check");
+    }
+  };
+
   return (
     <>
       <div className="pointer-events-none select-none absolute inset-0 overflow-hidden flex justify-center ">
@@ -71,6 +91,9 @@ export const DesignPreview = ({
           config={{ elementCount: 300, spread: 90 }}
         />
       </div>
+
+      {/* LOGIN MODAL */}
+      <LoginModal isOpen={isLoginModal} setIsOpen={setIsLoginModal} />
 
       <div className="mt-20 grid grid-cols-1 text-sm sm:grid-cols-12 sm:grid-rows-2 sm:gap-x-6 md:gap-x-8 lg:gap-x-12">
         <div className="sm:col-span-4 md:col-span-3 md:row-span-2 md:row-end-2">
@@ -152,9 +175,7 @@ export const DesignPreview = ({
 
             <div className="mt-8 flex justify-end pb-12">
               <Button
-                onClick={() =>
-                  createPaymentSession({ configId: configuration.id })
-                }
+                onClick={() => handelCheckout()}
                 loadingText="loading"
                 className="px-4 sm:px-6 lg:px-8"
               >
