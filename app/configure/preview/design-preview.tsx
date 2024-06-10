@@ -79,7 +79,6 @@ export const DesignPreview = ({
       // User need to login
       localStorage.setItem("configurationId", id);
       setIsLoginModal(true);
-      console.log("check");
     }
   };
 

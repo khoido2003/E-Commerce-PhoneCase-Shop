@@ -39,8 +39,6 @@ export const createCheckoutSession = async ({
 
   let order: Order | undefined = undefined;
 
-  // console.log(user.id, configuration.id);
-
   const existingOrder = await db.order.findFirst({
     where: {
       userId: user.id,
